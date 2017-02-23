@@ -222,7 +222,6 @@ void BPMDetect::updateXCorr(int process_samples)
     // calculate decay factor for xcorr filtering
     float xcorr_decay = (float)pow(0.5, 1.0 / (xcorr_decay_time_constant * target_srate / process_samples));
 
-    #pragma omp parallel for
     for (offs = windowStart; offs < windowLen; offs ++) 
     {
         LONG_SAMPLETYPE sum;
