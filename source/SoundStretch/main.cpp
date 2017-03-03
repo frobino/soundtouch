@@ -44,6 +44,8 @@
 #include "WavFile.h"
 #include "SoundTouch.h"
 #include "BPMDetect.h"
+// frobino: profile with google gperftools (google-pprof)
+#include "gperftools/profiler.h"
 
 using namespace soundtouch;
 using namespace std;
@@ -187,6 +189,9 @@ static void process(SoundTouch *pSoundTouch, WavInFile *inFile, WavOutFile *outF
     assert(nChannels > 0);
     buffSizeSamples = BUFF_SIZE / nChannels;
 
+    // frobino: profile with google gperftools (google-pprof)
+    ProfilerStart("soundstretch.prof");
+
     // Process samples read from the input file
     while (inFile->eof() == 0)
     {
@@ -213,6 +218,10 @@ static void process(SoundTouch *pSoundTouch, WavInFile *inFile, WavOutFile *outF
             outFile->write(sampleBuffer, nSamples * nChannels);
         } while (nSamples != 0);
     }
+
+    // frobino: profile with google gperftools (google-pprof)
+    ProfilerFlush();
+    ProfilerStop();
 
     // Now the input file is processed, yet 'flush' few last samples that are
     // hiding in the SoundTouch's internal processing pipeline.

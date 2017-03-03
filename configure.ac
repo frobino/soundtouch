@@ -227,6 +227,24 @@ AC_TYPE_SIGNAL
 dnl make -lm get added to the LIBS
 AC_CHECK_LIB(m, sqrt,,AC_MSG_ERROR([compatible libc math library not found])) 
 
+dnl make -lprofiler get added to the LIBS
+AC_CHECK_LIB(profiler, ProfilerStart,,AC_MSG_ERROR([compatible libprofiler library not found])) 
+
+AC_CHECK_PROG(GOOGLE_PPROF,google-pprof,yes)
+if test x"$GOOGLE_PPROF" != x"yes"; then
+   AC_MSG_ERROR([Please install google-perftools and libgoogle-perftools-dev before continuing.])
+fi
+
+# AC_CHECK_PROG(GOOGLE_PERFTOOLS,google-perftools,yes)
+# if test x"$GOOGLE_PERFTOOLS" != x"yes"; then
+#    AC_MSG_ERROR([Please install google-perftools before installing.])
+# fi
+# 
+# AC_CHECK_PROG(LIBGOOGLE_PERFTOOLS_DEV,libgoogle-perftools-dev,yes)
+# if test x"$LIBGOOGLE_PERFTOOLS_DEV" != x"yes"; then
+#    AC_MSG_ERROR([Please install libgoogle-perftools-dev before installing.])
+# fi
+
 dnl add whatever functions you might want to check for here
 #AC_CHECK_FUNCS([floor ftruncate memmove memset mkdir modf pow realpath sqrt strchr strdup strerror strrchr strstr strtol])
 
