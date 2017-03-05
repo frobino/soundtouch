@@ -61,6 +61,11 @@ using namespace soundtouch;
 
 #define max(x, y) (((x) > (y)) ? (x) : (y))
 
+#define USE_UTILS 1
+#ifdef USE_UTILS
+#include "TDStretchUtils.h"
+#endif
+
 
 /*****************************************************************************
  *
@@ -299,6 +304,9 @@ inline void TDStretch::overlap(SAMPLETYPE *pOutput, const SAMPLETYPE *pInput, ui
 // value over the overlapping period
 int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos) 
 {
+#ifdef USE_UTILS
+	return seekBestOverlapPositionFullC(channels, seekLength, overlapLength, pMidBuffer, refPos);
+#else
     int bestOffs;
     double bestCorr;
     int i;
@@ -337,6 +345,7 @@ int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos)
     clearCrossCorrState();
 
     return bestOffs;
+#endif
 }
 
 
