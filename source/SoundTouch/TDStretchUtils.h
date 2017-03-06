@@ -1,10 +1,3 @@
-/*
- * TDStretchUtils.h
- *
- *  Created on: Mar 5, 2017
- *      Author: edopao
- */
-
 #ifndef TDSTRETCHUTILS_H_
 #define TDSTRETCHUTILS_H_
 
@@ -13,11 +6,24 @@ extern "C" {
 #endif
 
 /*
- * FIXME: Porcherie
+ * Taken from "STTypes.h"
  */
-#define SAMPLETYPE float
+#ifdef SOUNDTOUCH_INTEGER_SAMPLES
+    // 16bit integer sample type
+    typedef short SAMPLETYPE;
+    // data type for sample accumulation: Use 32bit integer to prevent overflows
+    typedef long  LONG_SAMPLETYPE;
 
-int seekBestOverlapPositionFullC(int channels, int seekLength, int overlapLength, SAMPLETYPE *pMidBuffer, const SAMPLETYPE *refPos);
+#else
+    // floating point samples
+    typedef float  SAMPLETYPE;
+    // data type for sample accumulation: Use double to utilize full precision.
+    typedef double LONG_SAMPLETYPE;
+
+#endif  // SOUNDTOUCH_INTEGER_SAMPLES
+
+
+int seekBestOverlapPositionFullImpl(int channels, int seekLength, int overlapLength, SAMPLETYPE *pMidBuffer, const SAMPLETYPE *refPos);
 
 #ifdef __cplusplus
 }

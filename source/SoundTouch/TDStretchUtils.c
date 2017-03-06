@@ -8,14 +8,7 @@ double calcCrossCorr(int channels, int overlapLength, const float *mixingPos, co
 double calcCrossCorrAccumulate(int channels, int overlapLength, const float *mixingPos, const float *compare, double *norm_ptr);
 
 
-/*
- * TDStretchUtils.c
- *
- *  Created on: Mar 5, 2017
- *      Author: edopao
- */
-
-int seekBestOverlapPositionFullC(int channels, int seekLength, int overlapLength, SAMPLETYPE *pMidBuffer, const SAMPLETYPE *refPos)
+int seekBestOverlapPositionFullImpl(int channels, int seekLength, int overlapLength, SAMPLETYPE *pMidBuffer, const SAMPLETYPE *refPos)
 {
     int bestOffs;
     double bestCorr;
@@ -109,7 +102,7 @@ double calcCrossCorrAccumulate(int channels, int overlapLength, const float *mix
 {
 	double norm = *norm_ptr;
     double corr;
-    int i;
+    int i, j;
 
     corr = 0;
 
@@ -130,7 +123,7 @@ double calcCrossCorrAccumulate(int channels, int overlapLength, const float *mix
     }
 
     // update normalizer with last samples of this round
-    for (int j = 0; j < channels; j ++)
+    for (j = 0; j < channels; j ++)
     {
         i --;
         norm += mixingPos[i] * mixingPos[i];
