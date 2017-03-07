@@ -82,6 +82,13 @@ AC_ARG_ENABLE(integer-samples,
               [enable_integer_samples=no])
 
 
+# Let the user enable/disable openmp linking.
+AC_ARG_ENABLE(openmp,
+              [AC_HELP_STRING([--enable-openmp],
+                              [link with openmp library
+[default=no]])],,
+              [enable_openmp=no])
+
 # Let the user enable/disable the x86 optimizations.
 # Useful when compiling on non-x86 architectures.
 AC_ARG_ENABLE([x86-optimizations],
@@ -102,6 +109,16 @@ if test "x$enable_integer_samples" = "xyes"; then
 else
         echo "****** Float sample type enabled ******"
         AC_DEFINE(SOUNDTOUCH_FLOAT_SAMPLES,1,[Use Float as Sample type])
+fi
+
+
+if test "x$enable_openmp" = "xyes"; then
+        echo "****** openmp optimizations enabled ******"
+        OPT_FLAGS="-fopenmp"
+        CFLAGS="$OPT_FLAGS $CXXFLAGS"
+        CXXFLAGS="$OPT_FLAGS $CXXFLAGS"
+else
+        echo "****** openmp optimizations disabled ******"
 fi
 
 
