@@ -105,6 +105,15 @@ else
 fi
 
 
+if test "x$enable_openmp" = "xyes"; then
+        echo "****** openmp optimizations enabled ******"
+        AM_CFLAGS="-fopenmp $AM_CFLAGS"
+        AM_CXXFLAGS="-fopenmp $AM_CXXFLAGS"
+else
+        echo "****** openmp optimizations disabled ******"
+fi
+
+
 # Check if optimizations are supported in the system at build time.
 if test "x$enable_x86_optimizations" = "xyes" -a "x$ac_cv_header_cpuid_h" = "xyes"; then
         echo "****** x86 optimizations enabled ******"
@@ -180,6 +189,13 @@ else
         echo "****** x86 optimizations disabled ******"
         AC_DEFINE([SOUNDTOUCH_DISABLE_X86_OPTIMIZATIONS],[1],[Do not use x86 optimizations])
 fi
+
+# Set AM_CFLAGS
+AC_SUBST([AM_CFLAGS], [$AM_CFLAGS])
+
+# Set AM_CXXFLAGS
+AC_SUBST([AM_CXXFLAGS], [$AM_CXXFLAGS])
+
 
 # SSTypes.h by default enables optimizations. Those already got disabled if
 # the user requested for it or if the system does not support them.
