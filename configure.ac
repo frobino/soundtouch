@@ -117,6 +117,7 @@ fi
 
 if test "x$enable_openmp" = "xyes"; then
         echo "****** openmp optimizations enabled ******"
+        AM_CFLAGS="-fopenmp $AM_CFLAGS"
         AM_CXXFLAGS="-fopenmp $AM_CXXFLAGS"
 else
         echo "****** openmp optimizations disabled ******"
@@ -201,6 +202,9 @@ fi
 
 # Set AM_CXXFLAGS
 AC_SUBST([AM_CXXFLAGS], [$AM_CXXFLAGS])
+
+# Set AM_CFLAGS
+AC_SUBST([AM_CFLAGS], [$AM_CFLAGS])
 
 # Empty default CXXFLAGS so user can set them if desirable
 #AC_SUBST([CXXFLAGS], [ ])
