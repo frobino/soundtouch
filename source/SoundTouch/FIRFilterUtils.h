@@ -1,5 +1,5 @@
-#ifndef TDSTRETCHUTILS_H_
-#define TDSTRETCHUTILS_H_
+#ifndef FIRFILTERUTILS_H_
+#define FIRFILTERUTILS_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,11 +28,15 @@ extern "C" {
 
 #endif  // SOUNDTOUCH_INTEGER_SAMPLES
 
+typedef unsigned int    uint;
+typedef unsigned long   ulong;
 
-int seekBestOverlapPositionFullImpl(int channels, int seekLength, int overlapLength, SAMPLETYPE *pMidBuffer, const SAMPLETYPE *refPos);
+uint evaluateFilterStereoImpl(SAMPLETYPE *filterCoeffs, uint length, SAMPLETYPE resultDivider, uint resultDivFactor, SAMPLETYPE *dest, const SAMPLETYPE *src, uint numSamples);
+uint evaluateFilterMonoImpl(SAMPLETYPE *filterCoeffs, uint length, SAMPLETYPE resultDivider, uint resultDivFactor, SAMPLETYPE *dest, const SAMPLETYPE *src, uint numSamples);
+uint evaluateFilterMultiImpl(SAMPLETYPE *filterCoeffs, uint length, SAMPLETYPE resultDivider, uint resultDivFactor, SAMPLETYPE *dest, const SAMPLETYPE *src, uint numSamples, uint numChannels);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* TDSTRETCHUTILS_H_ */
+#endif /* FIRFILTERUTILS_H_ */

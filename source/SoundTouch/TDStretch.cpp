@@ -305,7 +305,7 @@ inline void TDStretch::overlap(SAMPLETYPE *pOutput, const SAMPLETYPE *pInput, ui
 int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos) 
 {
 #ifdef USE_C_IMPL
-	return seekBestOverlapPositionFullImpl(channels, seekLength, overlapLength, pMidBuffer, refPos);
+    return seekBestOverlapPositionFullImpl(channels, seekLength, overlapLength, pMidBuffer, refPos);
 #else
     int bestOffs;
     double bestCorr;

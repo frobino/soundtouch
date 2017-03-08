@@ -54,6 +54,11 @@
 
 using namespace soundtouch;
 
+#define USE_C_IMPL 1
+#ifdef USE_C_IMPL
+#include "FIRFilterUtils.h"
+#endif
+
 /*****************************************************************************
  *
  * Implementation of the class 'FIRFilter'
@@ -78,6 +83,9 @@ FIRFilter::~FIRFilter()
 // Usual C-version of the filter routine for stereo sound
 uint FIRFilter::evaluateFilterStereo(SAMPLETYPE *dest, const SAMPLETYPE *src, uint numSamples) const
 {
+#ifdef USE_C_IMPL
+    return evaluateFilterStereoImpl(filterCoeffs, length, resultDivider, resultDivFactor, dest, src, numSamples);
+#else
     int j, end;
 #ifdef SOUNDTOUCH_FLOAT_SAMPLES
     // when using floating point samples, use a scaler instead of a divider
@@ -129,6 +137,7 @@ uint FIRFilter::evaluateFilterStereo(SAMPLETYPE *dest, const SAMPLETYPE *src, ui
         dest[j + 1] = (SAMPLETYPE)sumr;
     }
     return numSamples - length;
+#endif
 }
 
 
@@ -137,6 +146,9 @@ uint FIRFilter::evaluateFilterStereo(SAMPLETYPE *dest, const SAMPLETYPE *src, ui
 // Usual C-version of the filter routine for mono sound
 uint FIRFilter::evaluateFilterMono(SAMPLETYPE *dest, const SAMPLETYPE *src, uint numSamples) const
 {
+#ifdef USE_C_IMPL
+    return evaluateFilterMonoImpl(filterCoeffs, length, resultDivider, resultDivFactor, dest, src, numSamples);
+#else
     int j, end;
 #ifdef SOUNDTOUCH_FLOAT_SAMPLES
     // when using floating point samples, use a scaler instead of a divider
@@ -172,11 +184,15 @@ uint FIRFilter::evaluateFilterMono(SAMPLETYPE *dest, const SAMPLETYPE *src, uint
         dest[j] = (SAMPLETYPE)sum;
     }
     return end;
+#endif
 }
 
 
 uint FIRFilter::evaluateFilterMulti(SAMPLETYPE *dest, const SAMPLETYPE *src, uint numSamples, uint numChannels)
 {
+#ifdef USE_C_IMPL
+    return evaluateFilterMultiImpl(filterCoeffs, length, resultDivider, resultDivFactor, dest, src, numSamples, numChannels);
+#else
     int j, end;
 
 #ifdef SOUNDTOUCH_FLOAT_SAMPLES
@@ -227,6 +243,7 @@ uint FIRFilter::evaluateFilterMulti(SAMPLETYPE *dest, const SAMPLETYPE *src, uin
         }
     }
     return numSamples - length;
+#endif
 }
 
 
