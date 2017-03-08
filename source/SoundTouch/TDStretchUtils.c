@@ -25,7 +25,7 @@ int seekBestOverlapPositionFullImpl(int channels, int seekLength, int overlapLen
 
     #pragma omp declare reduction (maxCorr : CorrResult_t :      \
         omp_out = omp_in.corr > omp_out.corr ? omp_out : omp_in) \
-        initializer ( omp_priv = { 0.0, 0 } )
+        initializer ( omp_priv = omp_orig )
 
     #pragma omp parallel for reduction (maxCorr:bestCorr) \
     default(none) firstprivate(norm) private(i) \
