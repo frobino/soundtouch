@@ -312,6 +312,7 @@ int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos)
     bestCorr = calcCrossCorr(refPos, pMidBuffer, norm);
     bestCorr = (bestCorr + 0.1) * 0.75;
 
+    #pragma omp parallel for
     for (i = 1; i < seekLength; i ++) 
     {
         double corr;
