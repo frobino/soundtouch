@@ -316,6 +316,7 @@ int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos)
         corr = ((corr + 0.1) * (1.0 - 0.25 * tmp * tmp));
 
         // Checks for the highest correlation value
+        #pragma omp critical
         if (corr > bestCorr) 
         {
             bestCorr = corr;
