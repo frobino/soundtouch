@@ -302,6 +302,7 @@ int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos)
     // Scans for the best correlation value by testing each possible position
     // over the permitted range.
     bestCorr = calcCrossCorr(refPos, pMidBuffer, norm);
+    #pragma omp parallel for
     for (i = 1; i < seekLength; i ++) 
     {
         // Calculates correlation value for the mixing position corresponding
