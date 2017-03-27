@@ -316,11 +316,16 @@ int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos)
         corr = ((corr + 0.1) * (1.0 - 0.25 * tmp * tmp));
 
         // Checks for the highest correlation value
-        #pragma omp critical
-        if (corr > bestCorr) 
+        if (corr > bestCorr)
         {
-            bestCorr = corr;
-            bestOffs = i;
+            // For performance reasons, enter the critical section
+            // only if a thread has found a new local maximum.
+            #pragma omp critical
+            if (corr > bestCorr)
+            {
+                bestCorr = corr;
+                bestOffs = i;
+            }
         }
     }
     // clear cross correlation routine state if necessary (is so e.g. in MMX routines).
