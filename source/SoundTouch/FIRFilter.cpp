@@ -87,6 +87,7 @@ uint FIRFilter::evaluateFilterStereo(SAMPLETYPE *dest, const SAMPLETYPE *src, ui
 
     end = 2 * (numSamples - length);
 
+    #pragma omp parallel for
     for (j = 0; j < end; j += 2) 
     {
         const SAMPLETYPE *ptr;
@@ -142,6 +143,7 @@ uint FIRFilter::evaluateFilterMono(SAMPLETYPE *dest, const SAMPLETYPE *src, uint
     assert(length != 0);
 
     end = numSamples - length;
+    #pragma omp parallel for
     for (j = 0; j < end; j ++) 
     {
         sum = 0;
@@ -189,6 +191,7 @@ uint FIRFilter::evaluateFilterMulti(SAMPLETYPE *dest, const SAMPLETYPE *src, uin
         sum[c] = 0;
     }
 
+    #pragma omp parallel for
     for (j = 0; j < end; j += numChannels)
     {
         const SAMPLETYPE *ptr;
