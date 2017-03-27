@@ -292,7 +292,7 @@ inline void TDStretch::overlap(SAMPLETYPE *pOutput, const SAMPLETYPE *pInput, ui
 int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos) 
 {
     int bestOffs;
-    double bestCorr, corr;
+    double bestCorr;
     double norm;
     int i;
 
@@ -308,7 +308,7 @@ int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos)
         // to 'i'. Now call "calcCrossCorrAccumulate" that is otherwise same as
         // "calcCrossCorr", but saves time by reusing & updating previously stored 
         // "norm" value
-        corr = calcCrossCorrAccumulate(refPos + channels * i, pMidBuffer, norm);
+        double corr = calcCrossCorrAccumulate(refPos + channels * i, pMidBuffer, norm);
 
         // heuristic rule to slightly favour values close to mid of the range
         double tmp = (double)(2 * i - seekLength) / (double)seekLength;

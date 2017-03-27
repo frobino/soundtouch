@@ -89,22 +89,21 @@ uint FIRFilter::evaluateFilterStereo(SAMPLETYPE *dest, const SAMPLETYPE *src, ui
 
     for (j = 0; j < end; j += 2) 
     {
-        const SAMPLETYPE *ptr;
+        const SAMPLETYPE *src_ptr = src + j;
 
         suml = sumr = 0;
-        ptr = src + j;
 
         for (i = 0; i < length; i += 4) 
         {
             // loop is unrolled by factor of 4 here for efficiency
-            suml += ptr[2 * i + 0] * filterCoeffs[i + 0] +
-                    ptr[2 * i + 2] * filterCoeffs[i + 1] +
-                    ptr[2 * i + 4] * filterCoeffs[i + 2] +
-                    ptr[2 * i + 6] * filterCoeffs[i + 3];
-            sumr += ptr[2 * i + 1] * filterCoeffs[i + 0] +
-                    ptr[2 * i + 3] * filterCoeffs[i + 1] +
-                    ptr[2 * i + 5] * filterCoeffs[i + 2] +
-                    ptr[2 * i + 7] * filterCoeffs[i + 3];
+            suml += src_ptr[2 * i + 0] * filterCoeffs[i + 0] +
+                    src_ptr[2 * i + 2] * filterCoeffs[i + 1] +
+                    src_ptr[2 * i + 4] * filterCoeffs[i + 2] +
+                    src_ptr[2 * i + 6] * filterCoeffs[i + 3];
+            sumr += src_ptr[2 * i + 1] * filterCoeffs[i + 0] +
+                    src_ptr[2 * i + 3] * filterCoeffs[i + 1] +
+                    src_ptr[2 * i + 5] * filterCoeffs[i + 2] +
+                    src_ptr[2 * i + 7] * filterCoeffs[i + 3];
         }
 
 #ifdef SOUNDTOUCH_INTEGER_SAMPLES
@@ -144,14 +143,16 @@ uint FIRFilter::evaluateFilterMono(SAMPLETYPE *dest, const SAMPLETYPE *src, uint
     end = numSamples - length;
     for (j = 0; j < end; j ++) 
     {
+        const SAMPLETYPE *src_ptr = src + j;
+
         sum = 0;
         for (i = 0; i < length; i += 4) 
         {
             // loop is unrolled by factor of 4 here for efficiency
-            sum += src[i + 0] * filterCoeffs[i + 0] + 
-                   src[i + 1] * filterCoeffs[i + 1] + 
-                   src[i + 2] * filterCoeffs[i + 2] + 
-                   src[i + 3] * filterCoeffs[i + 3];
+            sum += src_ptr[i + 0] * filterCoeffs[i + 0] +
+                   src_ptr[i + 1] * filterCoeffs[i + 1] +
+                   src_ptr[i + 2] * filterCoeffs[i + 2] +
+                   src_ptr[i + 3] * filterCoeffs[i + 3];
         }
 #ifdef SOUNDTOUCH_INTEGER_SAMPLES
         sum >>= resultDivFactor;
@@ -161,7 +162,6 @@ uint FIRFilter::evaluateFilterMono(SAMPLETYPE *dest, const SAMPLETYPE *src, uint
         sum *= dScaler;
 #endif // SOUNDTOUCH_INTEGER_SAMPLES
         dest[j] = (SAMPLETYPE)sum;
-        src ++;
     }
     return end;
 }
@@ -170,7 +170,13 @@ uint FIRFilter::evaluateFilterMono(SAMPLETYPE *dest, const SAMPLETYPE *src, uint
 uint FIRFilter::evaluateFilterMulti(SAMPLETYPE *dest, const SAMPLETYPE *src, uint numSamples, uint numChannels) const
 {
     uint i, j, end, c;
-    LONG_SAMPLETYPE *sum=(LONG_SAMPLETYPE*)alloca(numChannels*sizeof(*sum));
+    LONG_SAMPLETYPE *sum;
+    sum=(LONG_SAMPLETYPE*)alloca(numChannels*sizeof(*sum));
+
+    for (c = 0; c < numChannels; c ++)
+    {
+        sum[c] = 0;
+    }
 #ifdef SOUNDTOUCH_FLOAT_SAMPLES
     // when using floating point samples, use a scaler instead of a divider
     // because division is much slower operation than multiplying.
@@ -184,37 +190,31 @@ uint FIRFilter::evaluateFilterMulti(SAMPLETYPE *dest, const SAMPLETYPE *src, uin
 
     end = numChannels * (numSamples - length);
 
-    for (c = 0; c < numChannels; c ++)
-    {
-        sum[c] = 0;
-    }
-
     for (j = 0; j < end; j += numChannels)
     {
-        const SAMPLETYPE *ptr;
+        const SAMPLETYPE *src_ptr = src + j;
 
-        ptr = src + j;
+        LONG_SAMPLETYPE *sum_ptr = sum;
 
         for (i = 0; i < length; i ++)
         {
             SAMPLETYPE coef=filterCoeffs[i];
             for (c = 0; c < numChannels; c ++)
             {
-                sum[c] += ptr[0] * coef;
-                ptr ++;
+                sum_ptr[c] += src_ptr[0] * coef;
+                src_ptr ++;
             }
         }
         
         for (c = 0; c < numChannels; c ++)
         {
 #ifdef SOUNDTOUCH_INTEGER_SAMPLES
-            sum[c] >>= resultDivFactor;
+            sum_ptr[c] >>= resultDivFactor;
 #else
-            sum[c] *= dScaler;
+            sum_ptr[c] *= dScaler;
 #endif // SOUNDTOUCH_INTEGER_SAMPLES
-            *dest = (SAMPLETYPE)sum[c];
-            dest++;
-            sum[c] = 0;
+            dest[j+c] = (SAMPLETYPE)sum_ptr[c];
+            sum_ptr[c] = 0;
         }
     }
     return numSamples - length;
