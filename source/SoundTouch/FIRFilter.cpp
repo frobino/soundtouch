@@ -143,17 +143,19 @@ uint FIRFilter::evaluateFilterMono(SAMPLETYPE *dest, const SAMPLETYPE *src, uint
     assert(length != 0);
 
     end = numSamples - length;
-    #pragma omp parallel for
+    #pragma omp parallel for private (i, j, sum)
     for (j = 0; j < end; j ++) 
     {
+        const SAMPLETYPE *src_ptr = src + j;
+
         sum = 0;
         for (i = 0; i < length; i += 4) 
         {
             // loop is unrolled by factor of 4 here for efficiency
-            sum += src[i + 0] * filterCoeffs[i + 0] + 
-                   src[i + 1] * filterCoeffs[i + 1] + 
-                   src[i + 2] * filterCoeffs[i + 2] + 
-                   src[i + 3] * filterCoeffs[i + 3];
+            sum += src_ptr[i + 0] * filterCoeffs[i + 0] +
+                   src_ptr[i + 1] * filterCoeffs[i + 1] +
+                   src_ptr[i + 2] * filterCoeffs[i + 2] +
+                   src_ptr[i + 3] * filterCoeffs[i + 3];
         }
 #ifdef SOUNDTOUCH_INTEGER_SAMPLES
         sum >>= resultDivFactor;
@@ -163,7 +165,6 @@ uint FIRFilter::evaluateFilterMono(SAMPLETYPE *dest, const SAMPLETYPE *src, uint
         sum *= dScaler;
 #endif // SOUNDTOUCH_INTEGER_SAMPLES
         dest[j] = (SAMPLETYPE)sum;
-        src ++;
     }
     return end;
 }
