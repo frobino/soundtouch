@@ -82,6 +82,13 @@ AC_ARG_ENABLE(integer-samples,
               [enable_integer_samples=no])
 
 
+# Let the user enable/disable openmp linking.
+AC_ARG_ENABLE(openmp,
+              [AC_HELP_STRING([--enable-openmp],
+                              [link with openmp library
+[default=no]])],,
+              [enable_openmp=no])
+
 # Let the user enable/disable the x86 optimizations.
 # Useful when compiling on non-x86 architectures.
 AC_ARG_ENABLE([x86-optimizations],
@@ -107,8 +114,9 @@ fi
 
 if test "x$enable_openmp" = "xyes"; then
         echo "****** openmp optimizations enabled ******"
-        AM_CFLAGS="-fopenmp $AM_CFLAGS"
-        AM_CXXFLAGS="-fopenmp $AM_CXXFLAGS"
+        OPT_FLAGS="-fopenmp"
+        CFLAGS="$OPT_FLAGS $CXXFLAGS"
+        CXXFLAGS="$OPT_FLAGS $CXXFLAGS"
 else
         echo "****** openmp optimizations disabled ******"
 fi
@@ -189,13 +197,6 @@ else
         echo "****** x86 optimizations disabled ******"
         AC_DEFINE([SOUNDTOUCH_DISABLE_X86_OPTIMIZATIONS],[1],[Do not use x86 optimizations])
 fi
-
-# Set AM_CFLAGS
-AC_SUBST([AM_CFLAGS], [$AM_CFLAGS])
-
-# Set AM_CXXFLAGS
-AC_SUBST([AM_CXXFLAGS], [$AM_CXXFLAGS])
-
 
 # SSTypes.h by default enables optimizations. Those already got disabled if
 # the user requested for it or if the system does not support them.
