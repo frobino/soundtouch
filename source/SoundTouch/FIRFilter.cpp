@@ -141,6 +141,7 @@ uint FIRFilter::evaluateFilterMono(SAMPLETYPE *dest, const SAMPLETYPE *src, uint
     assert(length != 0);
 
     end = numSamples - length;
+    #pragma omp parallel for private (i, j, sum)
     for (j = 0; j < end; j ++) 
     {
         const SAMPLETYPE *src_ptr = src + j;
