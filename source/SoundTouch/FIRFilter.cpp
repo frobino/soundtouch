@@ -45,6 +45,9 @@
 #include <stdlib.h>
 #include "FIRFilter.h"
 #include "cpu_detect.h"
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 using namespace soundtouch;
 
@@ -87,6 +90,7 @@ uint FIRFilter::evaluateFilterStereo(SAMPLETYPE *dest, const SAMPLETYPE *src, ui
 
     end = 2 * (numSamples - length);
 
+    #pragma omp parallel for private (i, j, suml,sumr)
     for (j = 0; j < end; j += 2) 
     {
         const SAMPLETYPE *src_ptr = src + j;
@@ -172,12 +176,22 @@ uint FIRFilter::evaluateFilterMulti(SAMPLETYPE *dest, const SAMPLETYPE *src, uin
 {
     uint i, j, end, c;
     LONG_SAMPLETYPE *sum;
+#ifdef _OPENMP
+    int nthreads = omp_get_num_threads();
+    sum=(LONG_SAMPLETYPE*)alloca(numChannels*sizeof(*sum)*nthreads);
+
+    for (c = 0; c < numChannels * nthreads; c ++)
+    {
+        sum[c] = 0;
+    }
+#else
     sum=(LONG_SAMPLETYPE*)alloca(numChannels*sizeof(*sum));
 
     for (c = 0; c < numChannels; c ++)
     {
         sum[c] = 0;
     }
+#endif
 #ifdef SOUNDTOUCH_FLOAT_SAMPLES
     // when using floating point samples, use a scaler instead of a divider
     // because division is much slower operation than multiplying.
@@ -191,11 +205,17 @@ uint FIRFilter::evaluateFilterMulti(SAMPLETYPE *dest, const SAMPLETYPE *src, uin
 
     end = numChannels * (numSamples - length);
 
+    #pragma omp parallel for private (i, j, c)
     for (j = 0; j < end; j += numChannels)
     {
         const SAMPLETYPE *src_ptr = src + j;
 
+#ifdef _OPENMP
+        int thr_id = omp_get_thread_num();
+        LONG_SAMPLETYPE *sum_ptr = sum + thr_id * numChannels;
+#else
         LONG_SAMPLETYPE *sum_ptr = sum;
+#endif
 
         for (i = 0; i < length; i ++)
         {
