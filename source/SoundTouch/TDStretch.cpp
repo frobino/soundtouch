@@ -291,42 +291,31 @@ inline void TDStretch::overlap(SAMPLETYPE *pOutput, const SAMPLETYPE *pInput, ui
 // value over the overlapping period
 int TDStretch::seekBestOverlapPositionFull(const SAMPLETYPE *refPos) 
 {
-    int bestOffs;
-    double bestCorr;
-    double norm;
+    int bestOffs = 0;
+    double bestCorr = FLT_MIN;
     int i;
-
-    bestCorr = FLT_MIN;
-    bestOffs = 0;
 
     // Scans for the best correlation value by testing each possible position
     // over the permitted range.
-    bestCorr = calcCrossCorr(refPos, pMidBuffer, norm);
+    bestCorr = calcCrossCorr(refPos, pMidBuffer);
+
     #pragma omp parallel for
     for (i = 1; i < seekLength; i ++) 
     {
-        // Calculates correlation value for the mixing position corresponding
-        // to 'i'. Now call "calcCrossCorrAccumulate" that is otherwise same as
-        // "calcCrossCorr", but saves time by reusing & updating previously stored 
-        // "norm" value
-        double corr = calcCrossCorrAccumulate(refPos + channels * i, pMidBuffer, norm);
+        // Calculates correlation value for the mixing position corresponding to 'i'.
+        double corr = calcCrossCorr(refPos + channels * i, pMidBuffer);
 
         // heuristic rule to slightly favour values close to mid of the range
         double tmp = (double)(2 * i - seekLength) / (double)seekLength;
         corr = ((corr + 0.1) * (1.0 - 0.25 * tmp * tmp));
 
         // Checks for the highest correlation value
-        if (corr > bestCorr)
-        {
-            // For performance reasons, enter the critical section
-            // only if a thread has found a new local maximum.
-            #pragma omp critical
-            if (corr > bestCorr)
-            {
-                bestCorr = corr;
-                bestOffs = i;
-            }
-        }
+		#pragma omp critical
+		if (corr > bestCorr)
+		{
+			bestCorr = corr;
+			bestOffs = i;
+		}
     }
     // clear cross correlation routine state if necessary (is so e.g. in MMX routines).
     clearCrossCorrState();
@@ -370,7 +359,7 @@ int TDStretch::seekBestOverlapPositionQuick(const SAMPLETYPE *refPos)
 
             // Calculates correlation value for the mixing position corresponding
             // to 'tempOffset'
-            corr = (double)calcCrossCorr(refPos + channels * tempOffset, pMidBuffer, norm);
+            corr = (double)calcCrossCorr(refPos + channels * tempOffset, pMidBuffer);
             // heuristic rule to slightly favour values close to mid of the range
             double tmp = (double)(2 * tempOffset - seekLength) / seekLength;
             corr = ((corr + 0.1) * (1.0 - 0.25 * tmp * tmp));
@@ -742,7 +731,7 @@ void TDStretch::calculateOverlapLength(int aoverlapMs)
 }
 
 
-double TDStretch::calcCrossCorr(const short *mixingPos, const short *compare, double &norm) const
+double TDStretch::calcCrossCorr(const short *mixingPos, const short *compare) const
 {
     long corr;
     long lnorm;
@@ -766,7 +755,7 @@ double TDStretch::calcCrossCorr(const short *mixingPos, const short *compare, do
 
     // Normalize result by dividing by sqrt(norm) - this step is easiest 
     // done using floating point operation
-    norm = (double)lnorm;
+    double norm = (double) lnorm;
     return (double)corr / sqrt((norm < 1e-9) ? 1.0 : norm);
 }
 
@@ -888,9 +877,10 @@ void TDStretch::calculateOverlapLength(int overlapInMsec)
 
 
 /// Calculate cross-correlation
-double TDStretch::calcCrossCorr(const float *mixingPos, const float *compare, double &norm) const
+double TDStretch::calcCrossCorr(const float *mixingPos, const float *compare) const
 {
     double corr;
+    double norm;
     int i;
 
     corr = norm = 0;
